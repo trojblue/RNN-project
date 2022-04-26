@@ -239,7 +239,7 @@ If the algorithm was used to recommend clothing products automated system, it wo
 
 **transparency**: 
 
-The nature of the machine learning model is that the derived parameters are hard to interpret. The predictions could be strongly correlated to some specific words, and in that case the 写手 could potentially manipulate the reviews to make them look more appealing to the algorithm. The algorithm could be driven away from its 预定 intentions, and recommending products based on its own rules instead of representing the reviewers.
+The nature of the machine learning model is that the derived parameters are hard to interpret. The predictions could be strongly correlated to some specific words, and in that case the influencers could potentially manipulate the reviews to make them look more appealing to the algorithm. The algorithm could be driven away from its original intentions, and recommending products based on its own rules instead of representing the reviewers.
 
 **limitations:** 
 
@@ -261,7 +261,7 @@ some references used in this project includes:
 
 - [[1911.03329\] Memory-Augmented Recurrent Neural Networks Can Learn Generalized Dyck Languages (arxiv.org)](https://arxiv.org/abs/1911.03329)
 
-- [torch.nn — PyTorch 1.11.0 documentation](https://pytorch.org/docs/stable/nn.html?highlight=torch nn#module-torch.nn)
+- [torch.nn — PyTorch 1.11.0 documentation](https://pytorch.org/docs/stable/nn.html?highlight=torch)
 
 - [Women's E-Commerce Clothing Reviews | Kaggle](https://www.kaggle.com/datasets/nicapotato/womens-ecommerce-clothing-reviews)
 
