@@ -1,8 +1,41 @@
 import math
 import torch
+import torch.nn as nn
+
 from torch.nn.modules import Module
 from torch.nn.parameter import Parameter
 from torch.nn import init
+
+
+class BIRNN(nn.Module):
+    """
+    Bidirectional RNN that is initialized with the model myRNN.
+    """
+
+    def __init__(self, vocab_size, embed_size, hidden_size, pretrained_ebd, dropout):
+        """
+        :param vocab_size: size of vocabulary (len(text.vocab))
+        :param embed_size: embed layer size
+        :param hidden_size: hidden layer size
+        :param pretrained_ebd: gloVe pretrained model
+        :param dropout: dropout rate (0-1)
+        """
+        super(BIRNN, self).__init__()
+        self.emb = nn.Embedding(vocab_size, embed_size)
+        self.emb = self.emb.from_pretrained(pretrained_ebd, freeze=False)
+        self.RNN = myRNN(50,
+                         hidden_size=hidden_size,
+                         batch_first=True,
+                         bidirectional=True,
+                         dropout=dropout)
+        self.linear = nn.Linear(hidden_size * 2, 2)
+
+    def forward(self, text1):
+        emb = self.emb(text1)
+        o_n, h_n, = self.RNN(emb)
+        hidden_out = torch.cat((h_n[0, :, :], h_n[1, :, :]), 1)
+        out = self.linear(hidden_out)
+        return out
 
 class myRNN(Module):
     def __init__(self,  input_size, hidden_size,

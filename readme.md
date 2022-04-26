@@ -8,6 +8,14 @@ uses torchtext 0.6.0 because of compatability reasons with nltk
 
 
 
+
+
+**模型**
+
+Adam Optimizer, Cross Entropy loss, 10 epochs, lr=.001, batch_size=64
+
+
+
 ## Introduction
 
 
@@ -47,6 +55,16 @@ In this formula, we learn the **parameters** `W_ih`, `b_ih`, `W_hh`, `b_hh` from
 
 
 ==流程图片==
+
+
+
+```
+BIRNN(
+  (emb): Embedding(18854, 50)
+  (RNN): myRNN()
+  (linear): Linear(in_features=128, out_features=2, bias=True)
+)
+```
 
 
 
@@ -94,7 +112,7 @@ The original data set has the review split into two columns: the `title`, which 
 
 **data augmentation:** 
 
-The review columns are translated to German (for having a different sentence structure & word order), and then translated back to English. The newly created entries are inserted into the training dataset. 
+The review columns are translated to German (for having a different sentence structure & word order), and then translated back to English. The newly created entries are inserted into the training dataset. 4000 new rows are inserted into the total of 22641 rows.
 
 
 
