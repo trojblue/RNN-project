@@ -43,6 +43,7 @@ def run():
 
     label = data.Field(sequential=False)
 
+    # reading csv files
     train, val, test = data.TabularDataset.splits(
         path='../data/',
         train='train_data.csv',
@@ -52,9 +53,10 @@ def run():
         format='csv',
         fields=[('label', label), ('text', text)])
 
-    # pretrained glove embedding
+    # using pretrained glove embedding
     vectors = Vectors("../data/glove.6B.50d.txt")
 
+    # building vocabulary
     text.build_vocab(train, val, test,
                      vectors=vectors,
                      unk_init=torch.Tensor.normal_)

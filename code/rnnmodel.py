@@ -23,6 +23,8 @@ class BIRNN(nn.Module):
         super(BIRNN, self).__init__()
         self.emb = nn.Embedding(vocab_size, embed_size)
         self.emb = self.emb.from_pretrained(pretrained_ebd, freeze=False)
+
+        # initializes RNN with myRNN
         self.RNN = myRNN(50,
                          hidden_size=hidden_size,
                          batch_first=True,
@@ -32,16 +34,21 @@ class BIRNN(nn.Module):
 
     def forward(self, text1):
         emb = self.emb(text1)
-        o_n, h_n, = self.RNN(emb)
-        hidden_out = torch.cat((h_n[0, :, :], h_n[1, :, :]), 1)
+
+        o_n, h_n, = self.RNN(emb)   # RNN embeds
+        hidden_out = torch.cat((h_n[0, :, :], h_n[1, :, :]), 1) # hidden layer vectors
         out = self.linear(hidden_out)
         return out
 
 class myRNN(Module):
+    """implementation of RNN as a pytorch module
+    """
     def __init__(self,  input_size, hidden_size,
                  num_layers=1, bias=True, batch_first=False,
                  dropout=0, bidirectional=False):
         super(myRNN, self).__init__()
+
+        # model settings
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.num_layers = num_layers
@@ -52,8 +59,8 @@ class myRNN(Module):
         num_directions = 2
 
         self._all_weights = []
-        # for layer in range(num_layers):
 
+        # setup parameters
         for direction in range(num_directions):
             layer_input_size = input_size 
             w_ih = Parameter(torch.Tensor(hidden_size, layer_input_size))
@@ -71,12 +78,18 @@ class myRNN(Module):
                 setattr(self, name, param)
             self._all_weights.append(param_names)
 
+        # using continuous memory
         self.flatten_parameters()
+
+        # set weight by uniform distribution
         stdv = 1.0 / math.sqrt(self.hidden_size)
         for weight in self.parameters():
             init.uniform_(weight, -stdv, stdv)        
 
     def flatten_parameters(self):
+        """allocate parameters into a continuous chunk of memory
+        reference: pytorch's RNN flatten_parameters function
+        """
         any_param = next(self.parameters()).data
         if not any_param.is_cuda or not torch.backends.cudnn.is_acceptable(any_param):
             return
@@ -102,6 +115,12 @@ class myRNN(Module):
                     self.batch_first, bool(self.bidirectional))
 
     def forward(self, input, hx=None):
+        """
+        forward pass:
+        - initialize hidden layers to 0 before calculation,
+        - initialize the target vectors
+        - use rnn_tanh to calculate output
+        """
         max_batch_size = input.size(0)
         if hx is None:
             num_directions = 2 if self.bidirectional else 1
@@ -113,15 +132,24 @@ class myRNN(Module):
                         self._flat_weights, self.bias, self.num_layers,
                         self.dropout, self.training, self.bidirectional, 
                         self.batch_first)
-        output = result[0]
-        last_hidden_state = result[1]
+
+
+        output = result[0]              # final output
+        last_hidden_state = result[1]   # final hidden layer vector
+
         return output, last_hidden_state
 
     @property
     def _flat_weights(self):
-        return [p for layerparams in self.all_weights for p in layerparams]
+        return [
+            p for layerparams in self.all_weights
+            for p in layerparams
+        ]
 
     @property
     def all_weights(self):
-        return [[getattr(self, weight) for weight in weights] for weights in self._all_weights]
+        return [
+            [getattr(self, weight) for weight in weights]
+            for weights in self._all_weights
+        ]
 

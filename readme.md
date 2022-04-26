@@ -14,6 +14,14 @@ uses torchtext 0.6.0 because of compatability reasons with nltk
 
 Adam Optimizer, Cross Entropy loss, 10 epochs, lr=.001, batch_size=64
 
+```
+        forward pass: 
+        - initialize hidden layers to 0 before calculation,
+        - initialize the target vectors
+        - use rnn_tanh to calculate output
+        """
+```
+
 
 
 ## Introduction
