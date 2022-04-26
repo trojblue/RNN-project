@@ -2,59 +2,49 @@
 
 
 
-In this project, we're building a RNN model to categorize buyer reviews in to 'recommend' and 'not recommend'. 
-
-
-
-**模型**
-
-Adam Optimizer, Cross Entropy loss, 10 epochs, lr=.001, batch_size=64
-
-```
-        forward pass: 
-        - initialize hidden layers to 0 before calculation,
-        - initialize the target vectors
-        - use rnn_tanh to calculate output
-        """
-```
+> Xinlei Xu
+>
+> 1004711298
 
 
 
 ## Introduction
 
+In this project, we're building a RNN model to separate product reviews on women's clothing into 'recommend' and 'not recommend' categories. 
 
+The raw data obtained from Kaggle is cleaned, augmented and tokenized, then converted into vector representation using GloVe pretrained vectors. 
 
-(问题intro)
+We use a set of RNN layers to make predictions, and outputs a 2d vector representing the likelihood of recommendation. 
 
-The model we're building in the project aims to 搞清楚 the lexical connection between the 文字的顾客评价 and their 是否推荐 the 商品. 
+The model is compared with other machine learning algorithms on this dataset, and some limitations are found.
 
-The goal of the project is to build a bidirectional RNN network that classifies the customer reviews into categories of 'recommend' or 'not recommend', based on the Amazon review dataset. 
-
-The architecture of the model is explained in the later "model architecture" part.
-
-
-
-==介绍模型==
+The architecture of the model is explained in the "model architecture" part:
 
 <br>
 
 ## Model
 
-==流程图片==
+![image-20220426161137740](./readme.assets/image-20220426161137740.png)
+
+In the Pytorch forward pass, the following steps are conducted:
+
+- initialize hidden layers to 0 before calculation
+- initialize the target vectors
+- use `rnn_tanh` to calculate output
 
 
 
 ### **model architecture:**
 
-The RNN model consists of a word vector embedding layer, RNN layers, and a 全连接Linear Layer. The output is a 2d vector representing recommend or not recommend;
+The RNN model consists of a word vector **embedding layer**, **RNN layers**, and a **fully connected linear layer**. The output is a 2d vector representing recommend or not recommend.
 
-The **hidden state** of a RNN layer is related to the current input and the hidden state of the previous layer, with the formula:
+The hidden state of a RNN layer is related to the current input and the hidden state of the previous layer, with the formula:
 
-![image-20220426022940416](.\readme.assets\image-20220426022940416.png)
+![image-20220426022940416](./readme.assets/image-20220426022940416.png)
 
 
 
-In this formula, we learn the **parameters** `W_ih`, `b_ih`, `W_hh`, `b_hh` from the input data using the tanh function, where W and H represents weights and biases:
+we learn the **parameters** `W_ih`, `b_ih`, `W_hh`, `b_hh` from the input data using the tanh function, where W and H represents weights and biases:
 
 ```python
 cal = torch._C._VariableFunctions.rnn_tanh
@@ -62,24 +52,22 @@ result = cal(input, hx,
              self._flat_weights, self.bias, self.num_layers,
              self.dropout, self.training, self.bidirectional, 
              self.batch_first)
-
-output = result[0]              # final output
-last_hidden_state = result[1]   # final hidden layer vector
 ```
 
 The input layer is an embedding of size (18854, 50). The hidden layers have dimension of 64, and the output layer is a 2d vector. 
 
-The **number of parameters** of the model is: `50*64 + 64^2 + 64*2 = 7424`
+The **number of parameters** of the model is: `50*64 + 64^2 + 64*2 + 64*2 + 2 = 7554`
 
 - `50*64` parameters from embed layer to the first hidden layer
 - `64^2` parameters between the embed layers
 - `64*2` parameters from embed layer to output layer
+- `64*2+2` parameters from biases
 
 
 
 ### sample results:
 
-
+The results are coming from the final model with Adam Optimizer, Cross Entropy loss, 10 epochs, lr=0.001, batch_size=64:
 
 **successful example:** the label is `not recommend`, and the prediction is `not recommend`:
 
@@ -97,8 +85,6 @@ Very comfortable and flattering These pants are extremely comfortable and flatte
 
 
 
-
-
 <br>
 
 ## Data
@@ -109,7 +95,32 @@ The dataset was collected from this [Kaggle](https://www.kaggle.com/datasets/nic
 
 ### summary statistics:
 
-==TODO==
+**review length:** the peak in 500-550 is due to special characters taking up the entire length of the review. The characters are cleaned before tokenizing.
+
+```r
+data <- read.csv("D:/CSC2/413/docs/reviews_eda.csv")
+sd(data$ReviewLen)
+mean(data$ReviewLen)
+hist(data$ReviewLen)
+---
+[1] 147.2891
+[1] 326.2828
+```
+
+![image-20220426165825952](D:\CSC2\413\readme.assets\image-20220426165825952.png)
+
+**recommendation:** negative reviews (0) is fewer than positive reviews.
+
+```r
+sd(data$Recommended.IND)
+mean(data$Recommended.IND)
+hist(data$Recommended.IND)
+---
+[1] 0.3822156
+[1] 0.8223623
+```
+
+![image-20220426165912828](D:\CSC2\413\readme.assets\image-20220426165912828.png)
 
 
 
@@ -133,11 +144,11 @@ After cleaning up the raw data, the remaining dataset was split into `train`, `v
 
 ### training curve:
 
- The model was trained for 10 epochs on the training dataset, and the accuracy vs. epoch graph can be seen below. 
+The model was trained for 10 epochs on the training dataset, and the accuracy vs. epoch graph can be seen below:
 
-==改成loss==
+Increasing the epoch count could lead to overfitting, as the the accuracy on test dataset remained mostly the same after 5 epochs.
 
-
+![image-20220426154052342](./readme.assets/image-20220426154052342.png)
 
 
 
@@ -155,10 +166,13 @@ output_dim =2 			# 'recommend' or 'not recommend'
 label_num = 2
 ```
 
-- **embed size: ** The word vector has a size of 50, since we're using pretrained GloVe model that has a size of 50 dimensions.
+- **text length**: The parameter determines the length of the review that is being considered. The average length of review is 326 characters, so I tried setting it to 400 for large coverage, and gradually reduced it to 60, which has almost the same accuracy (~0.003 margin) and much faster compared to a higher length.
+- **embed size:** The word vector has a size of 50, since we're using pretrained GloVe model that has a size of 50 dimensions.
 - **hidden layer size:** The training task we're performing is a 二分任务, so the hidden layer size was set to a smaller number of 64 to reduce overfitting of the model.
 - **dropout rate:**  The dropout rate was set to a higher value to reduce overfitting. Some research I found online suggests that 0.5 (50%) dropout rate would be a good value for the hidden layers, and some testing on the validation set suggests similar results as well.
 - **output dimension:** The goal of this project was to 分辨 whether the customer recommends the product or not, which is two dimensional.
+
+
 
 <br>
 
@@ -176,13 +190,13 @@ Both **test accuracy** and **F1 score** are used to evaluate the model. We also 
 
 The test accuracy had some slow increase as more epoch are performed, and fluctuates at around 88% in the end. The graph for F1 score had a similar tendency:
 
-![image-20220425214124102](.\readme.assets\image-20220425214124102.png)
+![image-20220425214124102](./readme.assets/image-20220425214124102.png)
 
-![image-20220426033709037](.\readme.assets\image-20220426033709037.png)
+![image-20220426033709037](./readme.assets/image-20220426033709037.png)
 
 The summary of the model using `eval` function:
 
-![image-20220426033721414](.\readme.assets\image-20220426033721414.png)
+![image-20220426033721414](./readme.assets/image-20220426033721414.png)
 
 
 
@@ -198,20 +212,18 @@ When predicting long sequences with both good and bad aspects of the product, th
 
 ### justification:
 
-==TODO==
-
 The model performed reasonably well on this dataset. Since the dataset used was available on Kaggle, we can compare our results with other peoples' model directly. Some other models' performance on this dataset are listed below:
 
 (Note that the training sets are augmented differently. The other models are [borrowed from Kaggle](https://www.kaggle.com/code/azizozmen/nlp-comparative-rnn-dl-models-with-detailed-eda), and evaluated locally on a same testing set generated for the project.)
 
-| model                        | label | precision  | recall | f1-score |
-| ---------------------------- | ----- | ---------- | ------ | -------- |
-| SVM                          | 0     | 0.96       | 0.81   | 0.89     |
-|                              | 1     | 0.56       | 0.87   | 0.67     |
-| Random Forest                | 0     | 0.95       | 0.88   | 0.90     |
-|                              | 1     | 0.57       | 0.79   | 0.68     |
-| **This Project** <br />(RNN) | 0     | **0.9322** | 0.9158 | 0.9239   |
-|                              | 1     | **0.6256** | 0.6787 | 0.6510   |
+| model (overall accuracy) | label | precision  | recall | f1-score |
+| ------------------------ | ----- | ---------- | ------ | -------- |
+| SVM (87%)                | 0     | 0.96       | 0.81   | 0.89     |
+|                          | 1     | 0.56       | 0.87   | 0.67     |
+| Random Forest (85%)      | 0     | 0.95       | 0.88   | 0.90     |
+|                          | 1     | 0.57       | 0.79   | 0.68     |
+| **This Project** (88%)   | 0     | **0.9322** | 0.9158 | 0.9239   |
+|                          | 1     | **0.6256** | 0.6787 | 0.6510   |
 
 The model has the highest recall rate among all 3 models since it's using RNN, and is more balanced on precision between recommend and not recommend. The model is on par with some of the highest rated notebooks for this dataset on Kaggle, so we can say that it's having a reasonable performance.
 
@@ -247,28 +259,21 @@ The work was done by myself (Xinlei Xu).
 
 # Acknowledgements
 
-some references are used in this project:
+some references used in this project includes:
 
-- f1 curve
-- RNN deflate
+- [[1911.03329\] Memory-Augmented Recurrent Neural Networks Can Learn Generalized Dyck Languages (arxiv.org)](https://arxiv.org/abs/1911.03329)
 
+- [torch.nn — PyTorch 1.11.0 documentation](https://pytorch.org/docs/stable/nn.html?highlight=torch nn#module-torch.nn)
 
+- [Women's E-Commerce Clothing Reviews | Kaggle](https://www.kaggle.com/datasets/nicapotato/womens-ecommerce-clothing-reviews)
 
+- [NLP: Comparative RNN & DL Models With Detailed EDA | Kaggle](https://www.kaggle.com/code/azizozmen/nlp-comparative-rnn-dl-models-with-detailed-eda)
 
+- [What is the F1-score? (educative.io)](https://www.educative.io/edpresso/what-is-the-f1-score)
 
-[Women's E-Commerce Clothing Reviews | Kaggle](https://www.kaggle.com/datasets/nicapotato/womens-ecommerce-clothing-reviews)
+- [A Gentle Introduction to Dropout for Regularizing Deep Neural Networks (machinelearningmastery.com)](https://machinelearningmastery.com/dropout-for-regularizing-deep-neural-networks/)
 
-[NLP: Comparative RNN & DL Models With Detailed EDA | Kaggle](https://www.kaggle.com/code/azizozmen/nlp-comparative-rnn-dl-models-with-detailed-eda)
+- [Dropout: A Simple Way to Prevent Neural Networks from Overfitting (jmlr.org)](https://jmlr.org/papers/v15/srivastava14a.html)
 
-
-
-[A Gentle Introduction to Dropout for Regularizing Deep Neural Networks (machinelearningmastery.com)](https://machinelearningmastery.com/dropout-for-regularizing-deep-neural-networks/)
-
-
-
-[Dropout: A Simple Way to Prevent Neural Networks from Overfitting (jmlr.org)](https://jmlr.org/papers/v15/srivastava14a.html)
-
-
-
-[Ethical principles in machine learning and artificial intelligence: cases from the field and possible ways forward (nature.com)](https://www.nature.com/articles/s41599-020-0501-9)
+- [Ethical principles in machine learning and artificial intelligence: cases from the field and possible ways forward (nature.com)](https://www.nature.com/articles/s41599-020-0501-9)
 

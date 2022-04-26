@@ -94,19 +94,29 @@ def run():
 
     # training (training & evaluation functions are defined in helpers.py)
     print("training model....")
-    train_f1, test_f1, train_acc, test_accuracy = \
+    train_f1, test_f1, train_acc, test_accuracy, loss_list = \
         train_fuc(train_iter, val_iter, model, loss, optimizer, num_epochs)
 
     t_acc, t_f1 = evaluation_fuc(test_iter, model)
     print(f'test acc is {t_acc},test f1 is {t_f1}')
 
     # drawing plots
-    plot_graphs(num_epochs, test_accuracy, test_f1, train_acc, train_f1)
+    plot_graphs(num_epochs, test_accuracy, test_f1, train_acc, train_f1, loss_list)
 
 
-def plot_graphs(num_epochs, test_accuracy, test_f1, train_acc, train_f1):
+def plot_graphs(num_epochs, test_accuracy, test_f1, train_acc, train_f1, loss_list):
     """drawing graphs for qualitative & quantitative measures
     """
+    ep = list(range(num_epochs))
+    plt.plot(ep, loss_list, 'r--', label='loss')  # loss over epoch
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.savefig("../data/loss.jpg")
+    plt.clf()
+
+
+
     ep = list(range(num_epochs))
     plt.plot(ep, train_acc, 'r--', label='train_accuracy')  # test/train accuracy
     plt.plot(ep, test_accuracy, 'g--', label='test_accuracy')
@@ -114,6 +124,7 @@ def plot_graphs(num_epochs, test_accuracy, test_f1, train_acc, train_f1):
     plt.ylabel('Accuracy')
     plt.legend()
     plt.savefig("../data/accuracy.jpg")
+    plt.clf()
 
     l1 = plt.plot(ep, train_f1, 'r--', label='train_f1')  # test/train f1 score
     l2 = plt.plot(ep, test_f1, 'g--', label='test_f1')
@@ -121,6 +132,7 @@ def plot_graphs(num_epochs, test_accuracy, test_f1, train_acc, train_f1):
     plt.ylabel('F1_score')
     plt.legend()
     plt.savefig("../data/f1_score.jpg")
+    plt.clf()
 
 
 if __name__ == '__main__':

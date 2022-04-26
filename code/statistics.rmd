@@ -1,0 +1,34 @@
+---
+title: "413eda"
+author: "Xinlei Xu"
+date: "2022/4/26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+summary statistics for review length:
+```{r}
+data <- read.csv("D:/CSC2/413/docs/reviews_eda.csv")
+sd(data$ReviewLen)
+mean(data$ReviewLen)
+hist(data$ReviewLen)
+```
+
+```{r}
+recommend <- rnorm(18854, 147.28, 326.28)
+```
+
+
+summary statistics for recommendation:
+```{r}
+
+sd(recommend)
+mean(recommend)
+hist(recommend)
+```

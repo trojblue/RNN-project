@@ -90,6 +90,7 @@ def train_fuc(train_iter, test_iter, net, loss, optimizer, num_epochs):
 
     """
     batch_count, test_f1, train_f1, train_acc, test_accuracy = 0, [], [], [], []
+    loss_list = []
 
     for epoch in range(num_epochs):
         preds = []
@@ -135,12 +136,13 @@ def train_fuc(train_iter, test_iter, net, loss, optimizer, num_epochs):
         train_f1.append(train_f1score)
         train_acc.append(train_acc_sum / n)
         test_accuracy.append(test_acc)
+        loss_list.append(train_l_sum / n )
 
         print(
             'Epoch %d, train accuracy %.3f, test accuracy %.3f, test f1 %.3f'
             % (epoch + 1, train_acc_sum / n, test_acc, f1) )
 
-    return train_f1, test_f1, train_acc, test_accuracy
+    return train_f1, test_f1, train_acc, test_accuracy, loss_list
 
 
 if __name__ == '__main__':
