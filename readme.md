@@ -6,7 +6,7 @@
 >
 > 1004711298
 
-
+(for project structure, please see the `readme.md` within `code` folder)
 
 ## Introduction
 
@@ -14,9 +14,7 @@ In this project, we're building a RNN model to separate product reviews on women
 
 The raw data obtained from Kaggle is cleaned, augmented and tokenized, then converted into vector representation using GloVe pretrained vectors. 
 
-We use a set of RNN layers to make predictions, and outputs a 2d vector representing the likelihood of recommendation. 
-
-The model is compared with other machine learning algorithms on this dataset, and some limitations are found.
+We use a set of RNN layers to make predictions, and outputs a 2d vector representing the likelihood of recommendation. The model is compared to other machine learning algorithms on this dataset, and some limitations are found.
 
 The architecture of the model is explained in the "model architecture" part:
 
@@ -107,7 +105,7 @@ hist(data$ReviewLen)
 [1] 326.2828
 ```
 
-![image-20220426165825952](D:\CSC2\413\readme.assets\image-20220426165825952.png)
+![image-20220426165825952](./readme.assets/image-20220426165825952.png)
 
 **recommendation:** negative reviews (0) is fewer than positive reviews.
 
@@ -120,7 +118,7 @@ hist(data$Recommended.IND)
 [1] 0.8223623
 ```
 
-![image-20220426165912828](D:\CSC2\413\readme.assets\image-20220426165912828.png)
+![image-20220426165912828](./readme.assets/image-20220426165912828.png)
 
 
 
@@ -136,7 +134,7 @@ The review columns are translated to German (for having a different sentence str
 
 **dataset split:** 
 
-After cleaning up the raw data, the remaining dataset was split into `train`, `valid` and `test` sets. The proportion used was 7:2:1, which is a commonly used proportion for splitting the dataset. The train dataset is then augmented to create more entries. The `valid` and `test` sets are not getting augmented, so that they 作为 a better representation for the real scenarios.
+After cleaning up the raw data, the remaining dataset was split into `train`, `valid` and `test` sets. The proportion used was 7:2:1, which is a commonly used proportion for splitting the dataset. The train dataset is then augmented to create more entries. The `valid` and `test` sets are not getting augmented, so they act as better representations for the real scenarios.
 
 <br>
 
@@ -168,9 +166,9 @@ label_num = 2
 
 - **text length**: The parameter determines the length of the review that is being considered. The average length of review is 326 characters, so I tried setting it to 400 for large coverage, and gradually reduced it to 60, which has almost the same accuracy (~0.003 margin) and much faster compared to a higher length.
 - **embed size:** The word vector has a size of 50, since we're using pretrained GloVe model that has a size of 50 dimensions.
-- **hidden layer size:** The training task we're performing is a 二分任务, so the hidden layer size was set to a smaller number of 64 to reduce overfitting of the model.
+- **hidden layer size:** The training task we're performing is a binary classification, so the hidden layer size was set to a smaller number of 64 to reduce overfitting of the model.
 - **dropout rate:**  The dropout rate was set to a higher value to reduce overfitting. Some research I found online suggests that 0.5 (50%) dropout rate would be a good value for the hidden layers, and some testing on the validation set suggests similar results as well.
-- **output dimension:** The goal of this project was to 分辨 whether the customer recommends the product or not, which is two dimensional.
+- **output dimension:** The goal of this project was to check whether the customer recommends the product or not, which is two dimensional.
 
 
 

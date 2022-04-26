@@ -115,8 +115,6 @@ def plot_graphs(num_epochs, test_accuracy, test_f1, train_acc, train_f1, loss_li
     plt.savefig("../data/loss.jpg")
     plt.clf()
 
-
-
     ep = list(range(num_epochs))
     plt.plot(ep, train_acc, 'r--', label='train_accuracy')  # test/train accuracy
     plt.plot(ep, test_accuracy, 'g--', label='test_accuracy')
