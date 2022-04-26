@@ -124,9 +124,11 @@ class myRNN(Module):
         max_batch_size = input.size(0)
         if hx is None:
             num_directions = 2 if self.bidirectional else 1
+            # init hx to zero
             hx = input.new_zeros(self.num_layers * num_directions,
                                  max_batch_size, self.hidden_size,
                                  requires_grad=False)
+
         cal = torch._C._VariableFunctions.rnn_tanh
         result = cal(input, hx, 
                         self._flat_weights, self.bias, self.num_layers,

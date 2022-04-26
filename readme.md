@@ -1,12 +1,8 @@
-uses torchtext 0.6.0 because of compatability reasons with nltk
+# CSC413 Final Project
 
 
 
-
-
-# 标题
-
-
+In this project, we're building a RNN model to categorize buyer reviews in to 'recommend' and 'not recommend'. 
 
 
 
@@ -40,7 +36,11 @@ The architecture of the model is explained in the later "model architecture" par
 
 ==介绍模型==
 
+<br>
+
 ## Model
+
+==流程图片==
 
 
 
@@ -48,31 +48,32 @@ The architecture of the model is explained in the later "model architecture" par
 
 The RNN model consists of a word vector embedding layer, RNN layers, and a 全连接Linear Layer. The output is a 2d vector representing recommend or not recommend;
 
-
-
 The **hidden state** of a RNN layer is related to the current input and the hidden state of the previous layer, with the formula:
 
-![image-20220426022940416](D:\CSC2\413\readme.assets\image-20220426022940416.png)
+![image-20220426022940416](.\readme.assets\image-20220426022940416.png)
 
 
 
-In this formula, we learn the **parameters** `W_ih`, `b_ih`, `W_hh`, `b_hh` from the input data, where W and H represents weights and biases.
+In this formula, we learn the **parameters** `W_ih`, `b_ih`, `W_hh`, `b_hh` from the input data using the tanh function, where W and H represents weights and biases:
 
-==加上更详细的==
+```python
+cal = torch._C._VariableFunctions.rnn_tanh
+result = cal(input, hx, 
+             self._flat_weights, self.bias, self.num_layers,
+             self.dropout, self.training, self.bidirectional, 
+             self.batch_first)
 
-
-
-==流程图片==
-
-
-
+output = result[0]              # final output
+last_hidden_state = result[1]   # final hidden layer vector
 ```
-BIRNN(
-  (emb): Embedding(18854, 50)
-  (RNN): myRNN()
-  (linear): Linear(in_features=128, out_features=2, bias=True)
-)
-```
+
+The input layer is an embedding of size (18854, 50). The hidden layers have dimension of 64, and the output layer is a 2d vector. 
+
+The **number of parameters** of the model is: `50*64 + 64^2 + 64*2 = 7424`
+
+- `50*64` parameters from embed layer to the first hidden layer
+- `64^2` parameters between the embed layers
+- `64*2` parameters from embed layer to output layer
 
 
 
@@ -98,11 +99,11 @@ Very comfortable and flattering These pants are extremely comfortable and flatte
 
 
 
-
+<br>
 
 ## Data
 
-The dataset was collected from this [Kaggle](https://www.kaggle.com/datasets/nicapotato/womens-ecommerce-clothing-reviews) dataset on Women's E-commerce Clothing reviews on Amazon, and was scraped from open data in 2016. Actual clothing brands and the customer names are 变匿名了.
+The dataset was collected from this [Kaggle](https://www.kaggle.com/datasets/nicapotato/womens-ecommerce-clothing-reviews) dataset on Women's E-commerce Clothing reviews on Amazon, and was scraped from open data in 2016. Actual clothing brands and the customer names are hidden for privacy considerations.
 
 
 
@@ -120,17 +121,13 @@ The original data set has the review split into two columns: the `title`, which 
 
 **data augmentation:** 
 
-The review columns are translated to German (for having a different sentence structure & word order), and then translated back to English. The newly created entries are inserted into the training dataset. 4000 new rows are inserted into the total of 22641 rows.
-
-
-
-
+The review columns are translated to German (for having a different sentence structure & word order), and then translated back to English. The newly created entries are inserted into the training dataset. 4000 new rows are inserted into the total of 22641 rows. 
 
 **dataset split:** 
 
-After cleaning up the raw data, the remaining dataset was split into `train`, `valid` and `test` sets. The proportion used was 7:2:1, which is a commonly used proportion for splitting the dataset. The train dataset is then ==augmented== to create more entries. The `valid` and `test` sets are not getting augmented, so that they 作为 a better representation for the real scenarios.
+After cleaning up the raw data, the remaining dataset was split into `train`, `valid` and `test` sets. The proportion used was 7:2:1, which is a commonly used proportion for splitting the dataset. The train dataset is then augmented to create more entries. The `valid` and `test` sets are not getting augmented, so that they 作为 a better representation for the real scenarios.
 
-
+<br>
 
 ## Training
 
@@ -163,7 +160,7 @@ label_num = 2
 - **dropout rate:**  The dropout rate was set to a higher value to reduce overfitting. Some research I found online suggests that 0.5 (50%) dropout rate would be a good value for the hidden layers, and some testing on the validation set suggests similar results as well.
 - **output dimension:** The goal of this project was to 分辨 whether the customer recommends the product or not, which is two dimensional.
 
-
+<br>
 
 ## Results
 
@@ -177,15 +174,15 @@ Both **test accuracy** and **F1 score** are used to evaluate the model. We also 
 
 **quantitative results:**
 
-The test accuracy had some slow increase as more epoch are performed, and  fluctuates at around 88% in the end. The graph for F1 score had a similar tendency.
+The test accuracy had some slow increase as more epoch are performed, and fluctuates at around 88% in the end. The graph for F1 score had a similar tendency:
 
-![image-20220425214124102](D:\CSC2\413\readme.assets\image-20220425214124102.png)
+![image-20220425214124102](.\readme.assets\image-20220425214124102.png)
 
-![image-20220426033709037](D:\CSC2\413\readme.assets\image-20220426033709037.png)
+![image-20220426033709037](.\readme.assets\image-20220426033709037.png)
 
 The summary of the model using `eval` function:
 
-![image-20220426033721414](D:\CSC2\413\readme.assets\image-20220426033721414.png)
+![image-20220426033721414](.\readme.assets\image-20220426033721414.png)
 
 
 
@@ -205,7 +202,7 @@ When predicting long sequences with both good and bad aspects of the product, th
 
 The model performed reasonably well on this dataset. Since the dataset used was available on Kaggle, we can compare our results with other peoples' model directly. Some other models' performance on this dataset are listed below:
 
-(Note that the training sets may be augmented differently. The other models are [borrowed from Kaggle](https://www.kaggle.com/code/azizozmen/nlp-comparative-rnn-dl-models-with-detailed-eda), and evaluated locally on a same testing set generated for the project.)
+(Note that the training sets are augmented differently. The other models are [borrowed from Kaggle](https://www.kaggle.com/code/azizozmen/nlp-comparative-rnn-dl-models-with-detailed-eda), and evaluated locally on a same testing set generated for the project.)
 
 | model                        | label | precision  | recall | f1-score |
 | ---------------------------- | ----- | ---------- | ------ | -------- |
@@ -216,21 +213,29 @@ The model performed reasonably well on this dataset. Since the dataset used was 
 | **This Project** <br />(RNN) | 0     | **0.9322** | 0.9158 | 0.9239   |
 |                              | 1     | **0.6256** | 0.6787 | 0.6510   |
 
-The model has the highest recall rate among all 3 models since it's using RNN, and has a more balanced precision between recommend and not recommend. The model is on par with some of the highest rated notebooks for this dataset on Kaggle, so we can say that it's having a `reasonable performance.
+The model has the highest recall rate among all 3 models since it's using RNN, and is more balanced on precision between recommend and not recommend. The model is on par with some of the highest rated notebooks for this dataset on Kaggle, so we can say that it's having a reasonable performance.
 
-**limitations:** The model used smaller word vectors & smaller hidden layer size to reduce overfitting. Using a larger vector size & larger hidden layers could achieve better results on the dataset, but has the risk of overfitting the dataset. Further tuning of the model might achieve better results.
+The limitations of the model are listed under 'Ethical Considerations' part.
 
-
+<br>
 
 ## Ethical Considerations
 
 The dataset collected was based entirely on women's clothing brands and reviews. Therefore, it would not be as accurate when being used on reviews of other clothing categories, such as men's clothing. 
 
-**fairness & accuracy:**  If the algorithm was used to recommend clothing products automated system, it would be less fair to the shops that supplies men's clothing, as the prediction on their reviews would be less accurate compared to women's clothing reviews. 
+**fairness & accuracy:**  
 
-**transparency**: The nature of the machine learning model is that the derived parameters are hard to interpret. The predictions could be strongly correlated to some specific words, and in that case the 写手 could potentially manipulate the reviews to make them look more appealing to the algorithm. The algorithm could be driven away from its 预定 intentions, and recommending products based on its own rules instead of representing the reviewers.
+If the algorithm was used to recommend clothing products automated system, it would be less fair to the shops that supplies men's clothing, as the prediction on their reviews would be less accurate compared to women's clothing reviews. 
 
+**transparency**: 
 
+The nature of the machine learning model is that the derived parameters are hard to interpret. The predictions could be strongly correlated to some specific words, and in that case the 写手 could potentially manipulate the reviews to make them look more appealing to the algorithm. The algorithm could be driven away from its 预定 intentions, and recommending products based on its own rules instead of representing the reviewers.
+
+**limitations:** 
+
+The model used smaller word vectors & smaller hidden layer size to reduce overfitting. Using a larger vector size & larger hidden layers could achieve better results on the dataset, but has the risk of overfitting the dataset. Further tuning of the model might achieve slightly better results.
+
+<br>
 
 # Authors
 
@@ -238,7 +243,7 @@ The work was done by myself (Xinlei Xu).
 
 
 
-
+<br>
 
 # Acknowledgements
 
