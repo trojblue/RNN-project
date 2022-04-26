@@ -42,7 +42,7 @@ The hidden state of a RNN layer is related to the current input and the hidden s
 
 
 
-we learn the **parameters** `W_ih`, `b_ih`, `W_hh`, `b_hh` from the input data using the tanh function, where W and H represents weights and biases:
+we learn the **parameters** `W_ih`, `b_ih`, `W_hh`, `b_hh` from the input data using the tanh function:
 
 ```python
 cal = torch._C._VariableFunctions.rnn_tanh
