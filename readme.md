@@ -1,9 +1,5 @@
 # CSC413 Final Project
 
-
-
-> Xinlei Xu
->
 > 1004711298
 
 (for project structure, please see the `readme.md` within `code` folder)
